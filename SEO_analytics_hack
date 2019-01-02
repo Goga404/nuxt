@@ -1,0 +1,61 @@
+<template>
+    <div class="layout-container">
+        <g-header></g-header>
+        <nuxt/>
+        <g-footer></g-footer>
+    </div>
+</template>
+
+<script>
+    import gHeader from '../components/gHeader.vue'
+    import gFooter from '../components/gFooter.vue'
+
+    export default {
+        name: "gDefault",
+        components: {gHeader, gFooter},
+        watch: {
+            $route () {
+//                console.log('route changed', this.$route);
+                let new_path = this.$route.fullPath;
+
+                // skip scroll navigation on page - links with "#"
+                if ( new_path.includes('#') || !new_path ){
+                    return false;
+                }
+
+                // switch google analytics
+                    //Чтобы обновить счетчик, используйте команду set и укажите новое значение переменной page:
+                    ga('set', 'page', new_path);
+                    //Чтобы зарегистрировать действие на странице, отправьте обращение pageview при помощи команды send сразу после обновления счетчика.
+                    ga('send', 'pageview');
+
+
+                // YM
+                    let noscripts = document.querySelectorAll("html noscript"),
+                        id_ym;
+
+                    if (noscripts){
+                        noscripts.forEach(function (element) {
+                            let elem_txt = element.innerText;
+                            if (elem_txt.includes("src=\"https://mc.yandex.ru/watch/")){
+                                let start_slice = elem_txt.indexOf("watch/") + 6,
+                                    key_length = 8,
+                                    end_slice = start_slice + key_length;
+                                id_ym = elem_txt.slice(start_slice, end_slice);
+                                return false;
+                            }
+                        });
+                        ym(id_ym, 'hit', new_path)
+                    }
+            }
+        }
+    }
+</script>
+
+<style scoped scss>
+    .layout-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
